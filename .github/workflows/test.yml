@@ -1,0 +1,25 @@
+name: Test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: cache (1)
+        uses: actions/cache@v2
+        with:
+          path: 1
+          key: ${{ runner.os }}-test-1-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-test-1-
+
+      - name: cache (2)
+        uses: actions/cache@v2
+        with:
+          path: 2
+          key: ${{ runner.os }}-test-2-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-test-2-
+
+      - run: touch 1 2
