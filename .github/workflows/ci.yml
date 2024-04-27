@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - "dependabot/**"
+  pull_request_target:
+    types: [labeled]
+  workflow_dispatch: {}
+
+jobs:
+  build-images-amd:
+    runs-on: ubuntu-latest
+    if: >
+      contains(github.event.pull_request.labels.*.name, 'dependencies')
+      || github.event_name == 'push'
+      || github.event_name == 'workflow_dispatch'
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: set PWD environment variable
+        run: echo "PWD=$(pwd)" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v4.1.1
+        with:
+          persist-credentials: false
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3.0.0
+
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3.0.0
+        with:
+          install: true
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/djbender/multi-cache-demo:manifest-amd64
+
+  build-images-arm:
+    runs-on: macos-latest
+    if: >
+      contains(github.event.pull_request.labels.*.name, 'dependencies')
+      || github.event_name == 'push'
+      || github.event_name == 'workflow_dispatch'
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: set PWD environment variable
+        run: echo "PWD=$(pwd)" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v4.1.1
+        with:
+          persist-credentials: false
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3.0.0
+
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3.0.0
+        with:
+          install: true
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5.3.0
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: ghcr.io/djbender/multi-cache-demo:manifest-arm64
