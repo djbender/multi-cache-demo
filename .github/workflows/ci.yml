@@ -67,6 +67,9 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3.0.0
 
